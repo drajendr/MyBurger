@@ -3,6 +3,8 @@ import Aux from '../../hoc/common';
 
 import Burger from '../../components/Burger/Burger';
 import BuildControls from '../../components/Burger/BuildControls/BuildControls';
+import Modal from '../../components/UI/Modal/Modal';
+import OrderSummary from '../../components/Burger/OrderSummary/Ordersummary';
 
 const INGREDIENTS_PRICE = {
     salad:0.5,
@@ -25,7 +27,19 @@ class BugerBuilder extends Component{
             cheese:0,
             meat:0   
         },
-        totalPrice : 4
+        totalPrice : 4,
+        orderEnable : true,
+        purchasing : false
+    }
+
+    updateOrderEnableState = (ingredient) => {
+        const updateState = Object.keys(ingredient)
+                    .map(IgKey => {
+                        return ingredient[IgKey];
+                    }).reduce((sum,el) => {                         
+                        return sum + el;
+                    },0);
+        this.setState({ orderEnable: updateState<=0 });
     }
 
     addIngredientHandler = (type) => {
@@ -36,6 +50,7 @@ class BugerBuilder extends Component{
         const updatedIngredient = {...this.state.ingredient };
         updatedIngredient[type] = newIngredientCount;
         this.setState({ingredient:updatedIngredient, totalPrice:newPrice});
+        this.updateOrderEnableState(updatedIngredient);        
     };
 
     removeIngredientHandler = (type) => {
@@ -46,6 +61,18 @@ class BugerBuilder extends Component{
         const updatedIngredient = { ...this.state.ingredient };
         updatedIngredient[type] = newIngredientCount;
         this.setState({ingredient:updatedIngredient, totalPrice:newPrice});
+        this.updateOrderEnableState(updatedIngredient);
+    };
+
+    purchasingHandler = () => {
+        this.setState( { purchasing : true } );
+    };
+    purchasingCancelHandler = () => {
+        this.setState( { purchasing : false } );
+    };
+    purchasingContinueHandler = () => {
+        this.purchasingCancelHandler();
+        alert('Your order continued..');
     };
 
     render(){
@@ -59,11 +86,21 @@ class BugerBuilder extends Component{
        // console.log(disableInfo)
         return(
             <Aux>
+                <Modal show={ this.state.purchasing } modalClosed = { this.purchasingCancelHandler } >
+                    <OrderSummary 
+                        ingredients = { this.state.ingredient } 
+                        purchaseContinue = { this.purchasingContinueHandler }
+                        cancel = { this.purchasingCancelHandler }
+                    />
+                </Modal>
                 <Burger ingredient = {this.state.ingredient} />
                 <BuildControls
                      addIngredient = {this.addIngredientHandler} 
                      removeIngredient = {this.removeIngredientHandler} 
                      disabled = { disableInfo }
+                     BurgerPrice={ this.state.totalPrice }
+                     orderDisable = { this.state.orderEnable }
+                     purchasing = { this.purchasingHandler }
                 />
             </Aux>
         );
