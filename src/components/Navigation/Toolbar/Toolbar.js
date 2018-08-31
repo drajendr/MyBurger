@@ -9,7 +9,7 @@ const toolBar = ( props ) => (
         <Toogledrawer toogleClick = { props.clickToogle } />
         <div className = { Classes.Logo }>
             <Logo />
-        </div>       
+        </div>      
         <nav className = { Classes.DesktopOnly }>
            <Navigationitems />
         </nav>
